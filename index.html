@@ -1,1 +1,408 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La transmisión perdida</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Georgia, serif;
+  background: #080706;
+  color: #e8d9bd;
+}
+
+#game {
+  min-height: 100vh;
+  background:
+    linear-gradient(rgba(0,0,0,.63), rgba(0,0,0,.78)),
+    url("https://i.postimg.cc/76GVm3m4/acce2650-dde2-4708-94f3-a8234cc8f5a1.jpg")
+    center/cover fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 25px 15px;
+}
+
+.panel {
+  width: min(850px, 100%);
+  background: rgba(12, 9, 8, .88);
+  border: 1px solid #9b7950;
+  box-shadow: 0 0 35px #000;
+  padding: 30px 22px;
+  text-align: center;
+}
+
+h1 {
+  color: #c9a878;
+  letter-spacing: 3px;
+  font-size: clamp(22px, 4vw, 34px);
+  margin: 8px 0 15px;
+}
+
+h2 {
+  color: #c9a878;
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+
+p {
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+.radio {
+  width: 190px;
+  height: 125px;
+  margin: 25px auto;
+  border: 5px solid #755333;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #60452d, #1c120d);
+  box-shadow: inset 0 0 15px #000, 0 0 20px #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.radio::before {
+  content: "";
+  position: absolute;
+  width: 115px;
+  height: 65px;
+  left: 12px;
+  top: 25px;
+  border: 2px solid #a68a63;
+  background: repeating-linear-gradient(
+    0deg, #211812 0px, #211812 3px,
+    #70543a 4px, #70543a 5px
+  );
+}
+
+.radio::after {
+  content: "◉";
+  position: absolute;
+  right: 12px;
+  top: 32px;
+  font-size: 34px;
+  color: #c49b65;
+}
+
+.radio span {
+  z-index: 1;
+  margin-top: 95px;
+  color: #d1b48a;
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+
+button {
+  background: #493322;
+  border: 1px solid #b18a58;
+  color: #f1dfc0;
+  padding: 13px 20px;
+  margin: 8px;
+  font-family: Georgia, serif;
+  font-size: 15px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+button:hover {
+  background: #785537;
+  box-shadow: 0 0 14px #a47b4d;
+}
+
+button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.player {
+  width: min(560px, 100%);
+  aspect-ratio: 16 / 9;
+  margin: 20px auto;
+  border: 2px solid #80613e;
+  background: #000;
+}
+
+.player iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.sequence {
+  min-height: 65px;
+  border: 1px dashed #92734e;
+  padding: 15px;
+  margin: 20px auto;
+  max-width: 600px;
+  color: #e4c99e;
+  letter-spacing: 1px;
+}
+
+.sound-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 20px auto;
+}
+
+.sound-buttons button {
+  min-width: 125px;
+}
+
+.message {
+  min-height: 30px;
+  color: #d8b783;
+  margin: 15px 0;
+}
+
+.small {
+  font-size: 13px;
+  color: #b9a68c;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="game">
+  <div class="panel">
+
+    <section id="intro">
+      <h1>PRUEBA 2</h1>
+      <h2>LA TRANSMISIÓN PERDIDA</h2>
+
+      <div class="radio"><span>RADIO • 1932</span></div>
+
+      <p>
+        Una señal ha interrumpido el silencio de la mansión.
+        Escucha atentamente y reconstruye el orden de los sonidos.
+      </p>
+
+      <button onclick="startGame()">ENCENDER LA RADIO</button>
+    </section>
+
+    <section id="listening" class="hidden">
+      <h1 id="transmissionTitle">PRIMERA TRANSMISIÓN</h1>
+
+      <p id="transmissionText">
+        Escucha atentamente la señal. Necesitarás recordar
+        el orden de los sonidos que aparecen.
+      </p>
+
+      <div class="player">
+        <iframe
+          id="audioPlayer"
+          src=""
+          title="Transmisión de la radio"
+          allow="autoplay; encrypted-media"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+      <p class="small">
+        Cuando termine la transmisión, pausa el reproductor
+        y presiona el botón para continuar.
+      </p>
+
+      <button id="heardButton" onclick="showChallenge()">
+        YA ESCUCHÉ LA TRANSMISIÓN
+      </button>
+    </section>
+
+    <section id="challenge" class="hidden">
+      <h1 id="challengeTitle">RECONSTRUYE LA SEÑAL</h1>
+
+      <p id="challengeText">
+        Selecciona los sonidos en el mismo orden en que los escuchaste.
+      </p>
+
+      <div class="sequence" id="sequence">
+        Tu secuencia aparecerá aquí...
+      </div>
+
+      <div class="sound-buttons" id="soundButtons"></div>
+
+      <div class="message" id="message"></div>
+
+      <button onclick="checkSequence()">COMPROBAR RESPUESTA</button>
+      <button onclick="resetSequence()">BORRAR SECUENCIA</button>
+
+      <div id="continueArea" class="hidden">
+        <p>La primera señal ha sido reconstruida. Pero la radio aún tiene algo que revelar...</p>
+        <button onclick="startSecondTransmission()">
+          CONTINUAR SEGUNDA TRANSMISIÓN
+        </button>
+      </div>
+
+      <div id="finishArea" class="hidden">
+        <h2>¡PRUEBA COMPLETADA!</h2>
+        <p>
+          Has conseguido reconstruir las dos transmisiones.
+          La radio vuelve a quedar en silencio...
+        </p>
+        <p><strong>REGRESA AL MAPA PARA CONTINUAR EXPLORANDO LA MANSIÓN.</strong></p>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+const audio1 = "https://www.youtube.com/embed/OA_oo-ifUWw?autoplay=1";
+const audio2 = "https://www.youtube.com/embed/JixKpctOCok?autoplay=1";
+
+const answers = {
+  1: ["Piano", "Reloj", "Gramófono"],
+  2: ["Gramófono", "Piano", "Reloj", "Piano"]
+};
+
+let round = 1;
+let selected = [];
+
+function show(id) {
+  document.getElementById("intro").classList.add("hidden");
+  document.getElementById("listening").classList.add("hidden");
+  document.getElementById("challenge").classList.add("hidden");
+  document.getElementById(id).classList.remove("hidden");
+}
+
+function startGame() {
+  round = 1;
+  document.getElementById("audioPlayer").src = audio1;
+  document.getElementById("transmissionTitle").textContent =
+    "PRIMERA TRANSMISIÓN";
+  document.getElementById("transmissionText").textContent =
+    "Escucha atentamente la señal. Necesitarás recordar el orden de los sonidos que aparecen.";
+  document.getElementById("heardButton").textContent =
+    "YA ESCUCHÉ LA TRANSMISIÓN";
+  show("listening");
+}
+
+function showChallenge() {
+  document.getElementById("audioPlayer").src = "";
+  selected = [];
+
+  if (round === 1) {
+    document.getElementById("challengeTitle").textContent =
+      "PRIMERA SEÑAL: RECONSTRUYE EL ORDEN";
+    document.getElementById("challengeText").textContent =
+      "¿En qué orden escuchaste los sonidos de la primera transmisión?";
+  } else {
+    document.getElementById("challengeTitle").textContent =
+      "SEGUNDA SEÑAL: RECONSTRUYE EL ORDEN";
+    document.getElementById("challengeText").textContent =
+      "La señal se ha vuelto más confusa. Recuerda el orden exacto de los sonidos.";
+  }
+
+  document.getElementById("continueArea").classList.add("hidden");
+  document.getElementById("finishArea").classList.add("hidden");
+  document.getElementById("message").textContent = "";
+  createSoundButtons();
+  updateSequence();
+  show("challenge");
+}
+
+function createSoundButtons() {
+  const container = document.getElementById("soundButtons");
+  container.innerHTML = "";
+
+  ["Piano", "Reloj", "Gramófono"].forEach(sound => {
+    const button = document.createElement("button");
+    button.textContent = sound.toUpperCase();
+    button.onclick = () => selectSound(sound);
+    button.id = "sound-" + sound;
+    container.appendChild(button);
+  });
+}
+
+function selectSound(sound) {
+  const max = answers[round].filter(item => item === sound).length;
+  const already = selected.filter(item => item === sound).length;
+
+  if (already >= max || selected.length >= answers[round].length) {
+    return;
+  }
+
+  selected.push(sound);
+  updateSequence();
+  updateButtons();
+}
+
+function updateButtons() {
+  ["Piano", "Reloj", "Gramófono"].forEach(sound => {
+    const max = answers[round].filter(item => item === sound).length;
+    const already = selected.filter(item => item === sound).length;
+    document.getElementById("sound-" + sound).disabled =
+      already >= max || selected.length >= answers[round].length;
+  });
+}
+
+function updateSequence() {
+  const area = document.getElementById("sequence");
+  area.textContent = selected.length
+    ? selected.map((s, i) => (i + 1) + ". " + s).join("   →   ")
+    : "Tu secuencia aparecerá aquí...";
+}
+
+function resetSequence() {
+  selected = [];
+  updateSequence();
+  updateButtons();
+  document.getElementById("message").textContent = "";
+}
+
+function checkSequence() {
+  const correct = answers[round];
+
+  if (selected.length !== correct.length) {
+    document.getElementById("message").textContent =
+      "Aún faltan sonidos por ordenar. Escucha tu memoria y completa la secuencia.";
+    return;
+  }
+
+  if (selected.every((sound, i) => sound === correct[i])) {
+    document.getElementById("message").textContent =
+      "¡CORRECTO! Has reconstruido la transmisión.";
+
+    if (round === 1) {
+      document.getElementById("continueArea").classList.remove("hidden");
+    } else {
+      document.getElementById("finishArea").classList.remove("hidden");
+    }
+  } else {
+    document.getElementById("message").textContent =
+      "La secuencia no coincide. Inténtalo nuevamente.";
+  }
+}
+
+function startSecondTransmission() {
+  round = 2;
+  document.getElementById("audioPlayer").src = audio2;
+  document.getElementById("transmissionTitle").textContent =
+    "SEGUNDA TRANSMISIÓN";
+  document.getElementById("transmissionText").textContent =
+    "Una nueva señal ha comenzado. Escucha con atención: esta vez la secuencia es más larga.";
+  show("listening");
+}
+</script>
+
+</body>
+</html>
+
